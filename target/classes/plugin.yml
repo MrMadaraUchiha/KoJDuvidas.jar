@@ -1,0 +1,16 @@
+name: Kojajd
+version: '1.0-SNAPSHOT'
+main: pixel.ajd.Main
+description: Plugin intermediario de Reports do Knights of Mine
+api-version: 1.19
+commands:
+  duvida:
+  responder:
+  perguntas:
+  ajudante:
+  ajd:
+  pontos:
+  verpontos:
+  ajdcheck:
+  darponto:
+  tirarponto:
