@@ -8,7 +8,7 @@ O KoJDuvidas.jar é um plugin para servidores de Minecraft que permite à equipe
 
 ## Recursos
 
-- Chat de suporte para jogadores.
+- Suporte para jogadores.
 - Comandos de staff para responder dúvidas.
 - Configurações personalizáveis para se adequar ao seu servidor.
 
