@@ -4,7 +4,7 @@
 
 ## Descrição
 
-O KoJDuvidas.ja é um plugin para servidores de Minecraft que permite à equipe de suporte responder às dúvidas dos jogadores online de forma eficaz. Com este plugin, você pode melhorar a experiência dos jogadores, fornecendo suporte em tempo real.
+O KoJDuvidas.j é um plugin para servidores de Minecraft que permite à equipe de suporte responder às dúvidas dos jogadores online de forma eficaz. Com este plugin, você pode melhorar a experiência dos jogadores, fornecendo suporte em tempo real.
 
 ## Recursos
 
