@@ -6,142 +6,138 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import pixel.utils.PointsFunctions;
 
+public class ComandoResponder implements CommandExecutor {
+	private static final T_Config log = new T_Config(Main.getPlugin(Main.class), "log.yml");
+	private static final T_Config ajudante = new T_Config(Main.getPlugin(Main.class), "ajudante.yml");
+	private static final T_Config reports = Comando.reports;
 
-public class ComandoResponder implements CommandExecutor{
-	public static T_Config log = new T_Config(Main.getPlugin(Main.class), "log.yml");
-	public static T_Config ajudante = new T_Config(Main.getPlugin(Main.class), "ajudante.yml");
-	
-	
-	public String Mensagem2(String[] args) {
-		  StringBuilder sb = new StringBuilder();
-	   for (int i = 1; i< args.length; i++) {
-			   sb.append(args[i]);
-			   sb.append(" ");}
-	   return sb.toString();
-		
+	public static T_Config getLogConfig() {
+		return log;
+	}
+	public static T_Config getAjudanteConfig() {
+		return ajudante;
+	}
+	public static T_Config getReportsConfig() {
+		return reports;
+	}
+
+	private final PointsFunctions pointsFunctions = new PointsFunctions();
+
+	/**
+	 * Combina argumentos em uma única string.
+	 */
+	private String combinarMensagem(String[] args, int inicio) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = inicio; i < args.length; i++) {
+			sb.append(args[i]).append(" ");
+		}
+		return sb.toString().trim();
 	}
 
 	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String lbl, String[] args) {
-		Player p = (Player)sender;
-		if(cmd.getName().equalsIgnoreCase("responder")) {
-			if(!p.hasPermission("koj.ajd")) {
-				p.sendMessage("§7§l[KingoNetwork] >>§7 Voce n§o tem permissao");
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (!(sender instanceof Player p)) {
+			sender.sendMessage("§cEste comando só pode ser usado por jogadores!");
+			return true;
+		}
+
+		if (!cmd.getName().equalsIgnoreCase("responder")) return false;
+
+		if (!p.hasPermission("koj.ajd")) {
+			p.sendMessage("§7§l[KingoNetwork] >>§7 Você não tem permissão para usar este comando.");
+			return true;
+		}
+
+		if (args.length < 2) {
+			p.sendMessage("§7§l[KingoNetwork] >>§7 Use: /responder (jogador) (resposta)");
+			p.sendMessage("§7§l[KingoNetwork] >>§7 Exemplo: /responder MrMadaraUchiha O nível máximo é 100");
+			return true;
+		}
+
+		String reporterName = args[0].toLowerCase();
+		Player reporter = Bukkit.getPlayer(reporterName);
+
+		String mensagem = combinarMensagem(args, 1);
+
+		if (reporter == null) {
+			// Verificar se o jogador tem uma pergunta registrada
+			if (!Comando.reports.getConfig().contains("Player." + reporterName.toLowerCase())) {
+				p.sendMessage("§7§l[KingoNetwork] >>§7 O jogador §a" + reporterName.toLowerCase() +
+						"§7 não tem nenhuma pergunta registrada.");
 				return true;
 			}
-			
-			 if(args.length == 0 ) {
-  			   p.sendMessage("§7§l[KingoNetwork] >>§7 Digite /responder (jogador) resposta");
-  			   p.sendMessage("§7§l[KingoNetwork] >>§7 Exemplo: /responder MrMadaraUchiha O N§vel Maximo § 100");
-  			   return true;
-  		   }
-			 
-			 if(args.length > 0) {
-				 String reporter = args[0];
-  			   String ajd = p.getName();/*ajudante*/
-  			   String mensagem = Mensagem2(args); /* toda a duvida*/
-  			   Player players = Bukkit.getPlayer(reporter); /*player que reportou uma duvida*/
-  	    	   String totals = ""+Comando.reports.getConfig().getInt("total"); /*numero atual de duvidas*/
-  			   String as = ""+p.getName()+"."+totals; /* String de config*/
 
+			// Jogador offline, salvar a resposta no arquivo
+			Comando.reports.set("RespostasOffline." + reporterName.toLowerCase() + ".ajudante", p.getName());
+			Comando.reports.set("RespostasOffline." + reporterName.toLowerCase() + ".mensagem", mensagem);
+			Comando.reports.saveConfig();
+			atualizarPontosAjudante(p.getName());
+			// Avisar o ajudante que a resposta foi salva
+			p.sendMessage("§7§l[KingoNetwork] >>§7 O jogador §a" + reporterName.toLowerCase() +
+					"§7 está offline. A resposta foi salva e será enviada quando ele entrar.");
 
-			   if(Comando.reports.getConfig().getString("Player."+reporter.toLowerCase()) != null) {
-			players.sendMessage("§7§l[KingoNetwork] >>§7 O Ajudante : §a" + p.getName() );
-			players.sendMessage("§7§l[KingoNetwork] >>§7 Respondeu : §a" + mensagem );
-			players.sendMessage(" ");
-			String logs = "&a O Ajudante &b"+p.getName()+" &arespondeu o Jogador &b"+players.getName()+"$es &aresposta:&6 "+mensagem+" !";
-			   p.sendMessage(" ");
-			   p.sendMessage("§7§l[KingoNetwork] >>§7 Voc§ respondeu o jogador §a" + reporter.toLowerCase());
-			   p.sendMessage("§7§l[KingoNetwork] >>§7 Sua resposta foi §a" + mensagem);
-			   Comando.reports.set("Player."+reporter.toLowerCase(), null);
-			   Comando.reports.saveConfig();
-			   for(Player plsa : Bukkit.getOnlinePlayers()) {
-				  if(plsa.hasPermission("koj.staff")) {
-				   plsa.sendMessage(" ");
-				   plsa.sendMessage("§c§l[KingoNetwork] >>§c O Ajudante §a"+p.getName()+"§c respondeu §a"+reporter.toLowerCase());
-				   plsa.sendMessage("§c§l[KingoNetwork] >>§c Resposta: §a"+mensagem);
-			   }
-			  }
-			   log.set("Player."+as, logs);
-			   log.saveConfig();
-				  players.getWorld().playSound(players.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-
-
-				   
-				   
-				   
-				   
-				   /* Abaixo entre ifs s§o o sistema de contagem de duvidas respondidas por cada ajudante*/
-			   int pontos = ajudante.getConfig().getInt("Ajudante."+ajd);
-			   	int total = pontos +1 ;
-			   if(ajudante.getConfig().getString("Ajudante."+ajd) == null){
-				   /* se n§o tiver o player na config ajudante, seta 1 */
-					ajudante.set("Ajudante."+ajd, 1);
-					ajudante.saveConfig();
-
-			   }
-			   
-			   
-			   
-			   
-			   
-			   if(ajudante.getConfig().contains("Ajudante."+ajd)){
-				   /*se tiver o player na config ajudante pega o numero de pontos q ele tem e soma com +1*/
-	    		   ajudante.set("Ajudante."+ajd, total);
-	    		   ajudante.saveConfig();
-				   
-			   }
-				   
-				   
-				   
-				   
-				   
-				   
-				   
-				   
-			   }
-  			   
-  			   
-  			   
-			 }
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
+			return true;
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		return false;
+
+		String ajudanteName = p.getName();
+		int totalReports = reports.getConfig().getInt("total", 0);
+		String logPath = ajudanteName + "." + totalReports;
+
+		if (reports.getConfig().getString("Player." + reporterName) != null) {
+			responderDuvida(p, reporter, mensagem);
+			salvarLog(p, reporter, mensagem, logPath);
+			atualizarPontosAjudante(ajudanteName);
+		} else {
+			p.sendMessage("§7§l[KingoNetwork] >>§7 Não há dúvidas registradas para o jogador §a" + reporterName + "§7.");
+		}
+
+		return true;
 	}
 
+	/**
+	 * Responde a dúvida do jogador e notifica outros jogadores com permissão.
+	 */
+	private void responderDuvida(Player ajudante, Player reporter, String mensagem) {
+		reporter.sendMessage("§7§l[KingoNetwork] >>§7 O Ajudante: §a" + ajudante.getName());
+		reporter.sendMessage("§7§l[KingoNetwork] >>§7 Respondeu: §a" + mensagem);
+		reporter.sendMessage(" ");
+		ajudante.sendMessage("§7§l[KingoNetwork] >>§7 Você respondeu o jogador §a" + reporter.getName());
+		ajudante.sendMessage("§7§l[KingoNetwork] >>§7 Sua resposta foi: §a" + mensagem);
+
+		reports.getConfig().set("Player." + reporter.getName().toLowerCase(), null);
+		reports.saveConfig();
+
+		for (Player staff : Bukkit.getOnlinePlayers()) {
+			if (staff.hasPermission("koj.staff")) {
+				staff.sendMessage("§c§l[KingoNetwork] >>§c O Ajudante §a" + ajudante.getName() +
+						"§c respondeu §a" + reporter.getName());
+				staff.sendMessage("§c§l[KingoNetwork] >>§c Resposta: §a" + mensagem);
+			}
+		}
+
+		reporter.getWorld().playSound(reporter.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+	}
+
+	/**
+	 * Salva um log da resposta no arquivo de logs.
+	 */
+	private void salvarLog(Player ajudante, Player reporter, String mensagem, String logPath) {
+		String logEntry = "&a O Ajudante &b" + ajudante.getName() +
+				" &arespondeu o Jogador &b" + reporter.getName() +
+				"&e com a resposta: &6" + mensagem;
+		log.set("Player." + logPath, logEntry);
+		log.saveConfig();
+	}
+
+	/**
+	 * Atualiza os pontos do ajudante no arquivo de configuração.
+	 */
+	private void atualizarPontosAjudante(String ajudanteName) {
+		int pontosAtuais = ajudante.getConfig().getInt("Ajudante." + ajudanteName, 0);
+		ajudante.set("Ajudante." + ajudanteName, pontosAtuais + 1);
+		ajudante.saveConfig();
+		pointsFunctions.adicionarPontos(Bukkit.getPlayer(ajudanteName), 1);
+	}
 }
