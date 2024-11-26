@@ -1,12 +1,13 @@
 pixel\ajd\ComandoVPonto.class
 pixel\ajd\ComandoResponder.class
 pixel\ajd\Comando.class
+pixel\ajd\RespostaOfflineListener.class
 pixel\ajd\ComandoPonto.class
 pixel\ajd\T_Config.class
 pixel\ajd\ComandoAdm.class
 pixel\ajd\Main.class
-pixel\shop\ShopInv.class
 pixel\ajd\Events.class
 com\sagan\kojajd\Criar.class
 pixel\ajd\ComandoLog.class
+pixel\utils\PointsFunctions.class
 pixel\ajd\Comando$1.class
